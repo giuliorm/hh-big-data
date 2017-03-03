@@ -33,7 +33,9 @@ terminal, where **branch name** is the name of your branch, e.g.
     1. `companies` - for the companies service
     1. `resumes` - for the resumes service
 1. Before you make any changes in any files, make sure your master branch
-is actual. To do that, enter the command `git pull origin master` -
+is actual. To do that, enter the command `git pull origin master`, 
+ where `git pull` is a command, `origin` - the name of this repository
+ as remote repository, `master` - name of the branch.
 it will download all the changes from the server. You should do it
 every time before you develop anything.
 
