@@ -1,6 +1,6 @@
 # hh-big-data
 A research on the vacancies and resumes data from Head Hunter. 
-A relation of skill set and salary is estimated, for that 
+A relation of skill set and salary is estimated, for that some intermediate steps are performed.
 
 # How to use git
 
