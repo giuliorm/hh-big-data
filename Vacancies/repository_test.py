@@ -1,4 +1,4 @@
-from main.database.repository import MongoConnection
+from .repository import MongoConnection
 
 connection = None
 

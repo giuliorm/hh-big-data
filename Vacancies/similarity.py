@@ -1,7 +1,7 @@
 __author__ = 'JuriaSan'
 from pymystem3 import Mystem
-from repository import MongoConnection
-from TextDataHandlers import TextHandler
+from .repository import MongoConnection
+from .TextDataHandlers import TextHandler
 from pymorphy2 import MorphAnalyzer
 from lxml.html import document_fromstring
 from scipy import spatial

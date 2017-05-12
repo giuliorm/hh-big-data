@@ -1,7 +1,7 @@
 __author__ = 'JuriaSan'
 
 import requests
-from repository import MongoConnection
+from .repository import MongoConnection
 from multiprocessing import Pool
 
 def load_vacancies_json(spec_id, page_num):

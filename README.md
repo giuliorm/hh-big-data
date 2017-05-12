@@ -2,12 +2,6 @@
 A research on the vacancies and resumes data from Head Hunter. 
 A relation of skill set and salary is estimated, for that 
 
-# How to export mongodb database
-
-## Windows
-
-
-
 # How to use git
 
 ## Quick instruction
@@ -25,7 +19,7 @@ describe what you're committing
 by typing `git branch`
 7. You're done, your changes now in the repository
 
-##Long instruction
+## Long instruction
 
 1. [Download](https://git-scm.com/downloads) and install git
 1. Clone this repository to the desired folder by terminal command: 
