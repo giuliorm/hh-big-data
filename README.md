@@ -1,9 +1,16 @@
-# hh-crawler
-A framework for crawling data from hh.ru website
+# hh-big-data
+A research on the vacancies and resumes data from Head Hunter. 
+A relation of skill set and salary is estimated, for that 
 
-#How to use git
+# How to export mongodb database
 
-##Quick instruction
+## Windows
+
+
+
+# How to use git
+
+## Quick instruction
 
 1. [Download](https://git-scm.com/downloads) and install git
 2. Enter command `git clone https://github.com/giuliorm/hh-crawler`
