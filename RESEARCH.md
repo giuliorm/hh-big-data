@@ -43,26 +43,25 @@ As you have Spark installed and working, the following steps should be performed
 Every item of the following is explained in detail below.
 
 1. Build a Bag-Of-Words model for all vacancies.
-2. Transform text representation of every vacancy to numeric feature vector.
-3. Form vacancies dataset with required fields.
-[3a.] (This issue is optional). Perform PCA to reduce feature space of a dataset.
-4. Clusterize vacancies using obtained Bag-Of-Words feature vectors (e.g. dataset).
-5. For every vacancy: Retrieve a skill set.
-7. For every vacancy: Compute a relevance.
-8. For every skill in the each vacancy's skill set:
-9. Compute a relative weight of skill.
-10. Compute Pareto optimality for the most frequent skill sets.
+2. Retrieve a skill set of every vacancy
+3. Transform text representation of every vacancy to numeric feature vector.
+4. Form vacancies dataset with required fields.
+[4a.] (This issue is optional). Apply PCA to reduce feature space of a dataset.
+5. Clusterize vacancies in the obtained dataset.
+6. For every vacancy: Compute a relevance.
+7. For every skill in the each vacancy's skill set: Compute a relative weight of skill.
+8. Compute Pareto optimality for the most frequent skill sets.
 
 Below a detailed explanation of every item is given.
+**Remember, that items below describe only required functionality, but not the 
+actual code steps of the algorithm. Required logic can be implemented by several ways, and it's up to you.**
 
 ## Build a Bag-Of-Words model for all vacancies
 
 Bag-Of-Words - it's a vector of unique words, which are contained in the text representation among all vacancies.
-In our case, the fields `name`, `description` and `key_skills` of a vacancy will be
+In our case, the fields `name`, `description` of a vacancy will be
 taken to construct text representation. Consider, that Head Hunter data is in Russian, so
 to handle Russian text there is a need to search libraries, which maintain Russian.
-**Remember, that items below describe only required functionality, but not the 
-actual code steps of the algorithm. Required logic can be implemented by several ways, and it's up to you.**
 
 1. Remove unnecessary characters from text string for single vacancy.
 2. Remove stop words. Stop words refer to the most common words in a language, which 
@@ -73,7 +72,16 @@ care no sence for text meaning (e.g. at all, usually, is, are, at least...)
 [4a.] (Optional) Compute n-grams to complement list of words.
 [5.](Optional) A threshold to the Bag-Of-Words length, if needed,
  is computed as 2/3 of the word list or 3/4 of the word list.
- 
+
+## Retrieve a skill set of every vacancy
+
+Normally, required vacancy skills are contained in the `key_skills` field. But often this field
+is empty, and the `description` field should be explored to retrieve a skill set. Consider, that
+the term _skill set_ is not the _word frequency vector_ term. Skill set is a vector of words, which contains
+the most meaningful words to present the skill set, and that means, that skill set has actually less length than
+word frequency vector. As there is no way to retrieve "skill words" directly,
+it's a non trivial task to obtain the skills from `description`.
+
 ## Transform text representation of every vacancy to numeric feature vector
 
 To transform vacancies to feature vectors, we need to transform vector
@@ -99,3 +107,27 @@ of words for every vacancy to word frequency vector among all Bag-Of-Words.
 `(1) [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
 (2) [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]`
 
+## Form vacancies dataset with required fields
+
+The final vacancies dataset will be formed as list of entities, where each entity includes feature vector 
+(e.g. word frequency metric or tf-idf metric) and skill set, which is also a list of words.
+
+Feature vector is presented by the word frequency vector, formed from the words
+of `name` and  `description` fields.
+
+## Clusterize vacancies in the obtained dataset
+
+Any clustering algorithm can be applied to obtained vacancy dataset,
+k-means is preferrable, because it performs well on text data.
+
+## For every vacancy: Compute a relevance
+
+For every vacancy relevance is the <number of vacancies, which contain given skill set / number of all vacancies>
+
+## For every skill in the each vacancy's skill set: Compute a relative weight of skill
+
+The relative weight of skill is the <number of vacancies in cluster, which contain given skill / all vacancies in cluster>
+
+## Compute Pareto optimality for the most frequent skill sets
+
+---Coming soon----
