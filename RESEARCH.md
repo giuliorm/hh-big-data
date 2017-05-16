@@ -76,8 +76,8 @@ care no sence for text meaning (e.g. at all, usually, is, are, at least...)
  
 ## Transform text representation of every vacancy to numeric feature vector
 
-To transform  Bag-Of-Words to feature vector, for every Bag-Of-Words we need to count
-word frequency among all Bags-Of-Words. 
+To transform vacancies to feature vectors, we need to transform vector
+of words for every vacancy to word frequency vector among all Bag-Of-Words.
 
 **Example:**
 
@@ -95,3 +95,7 @@ word frequency among all Bags-Of-Words.
     "Mary",
     "too"
 ]`
+`Feature vectors`
+`(1) [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
+(2) [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]`
+
