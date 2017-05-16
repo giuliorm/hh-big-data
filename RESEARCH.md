@@ -46,11 +46,11 @@ Every item of the following is explained in detail below.
 2. Retrieve a skill set of every vacancy
 3. Transform text representation of every vacancy to numeric feature vector.
 4. Form vacancies dataset with required fields.
-[4a.] (This issue is optional). Apply PCA to reduce feature space of a dataset.
-5. Clusterize vacancies in the obtained dataset.
-6. For every vacancy: Compute a relevance.
-7. For every skill in the each vacancy's skill set: Compute a relative weight of skill.
-8. Compute Pareto optimality for the most frequent skill sets.
+5. (Optional) Apply PCA to reduce feature space of a dataset.
+6. Clusterize vacancies in the obtained dataset.
+7. For every vacancy: Compute a relevance.
+8. For every skill in the each vacancy's skill set: Compute a relative weight of skill.
+9. Compute Pareto optimality for the most frequent skill sets.
 
 Below a detailed explanation of every item is given.
 **Remember, that items below describe only required functionality, but not the 
@@ -69,8 +69,8 @@ care no sence for text meaning (e.g. at all, usually, is, are, at least...)
 3. Stemming - transform every word to its original grammatic form 
 (e.g. _am, is, are_ will correspond to _be_).
 4. Split text string into words.
-[4a.] (Optional) Compute n-grams to complement list of words.
-[5.](Optional) A threshold to the Bag-Of-Words length, if needed,
+5. (Optional) Compute n-grams to complement list of words.
+6. (Optional) A threshold to the Bag-Of-Words length, if needed,
  is computed as 2/3 of the word list or 3/4 of the word list.
 
 ## Retrieve a skill set of every vacancy
@@ -89,23 +89,23 @@ of words for every vacancy to word frequency vector among all Bag-Of-Words.
 
 **Example:**
 
-`(1) John likes to watch movies. Mary likes movies too.`
-`(2) John also likes to watch football games.`
-`Bag-Of-Words: [
-    "John",
-    "likes",
-    "to",
-    "watch",
-    "movies",
-    "also",
-    "football",
-    "games",
-    "Mary",
-    "too"
-]`
-`Feature vectors`
-`(1) [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]
-(2) [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]`
+`(1) John likes to watch movies. Mary likes movies too.`  
+`(2) John also likes to watch football games.`  
+`Bag-Of-Words: [`  
+`  "John",`  
+    `"likes",`   
+    `"to",`    
+    `"watch",`    
+    `"movies",`    
+    `"also",`  
+    `"football",`  
+    `"games",`  
+    `"Mary",`  
+    `"too"`  
+`]`  
+`Feature vectors`  
+`(1) [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]`  
+`(2) [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]`     
 
 ## Form vacancies dataset with required fields
 
@@ -122,11 +122,11 @@ k-means is preferrable, because it performs well on text data.
 
 ## For every vacancy: Compute a relevance
 
-For every vacancy relevance is the <number of vacancies, which contain given skill set / number of all vacancies>
+For every vacancy relevance is the `<number of vacancies, which contain given skill set / number of all vacancies>`
 
 ## For every skill in the each vacancy's skill set: Compute a relative weight of skill
 
-The relative weight of skill is the <number of vacancies in cluster, which contain given skill / all vacancies in cluster>
+The relative weight of skill is the `<number of vacancies in cluster, which contain given skill / all vacancies in cluster>`
 
 ## Compute Pareto optimality for the most frequent skill sets
 
