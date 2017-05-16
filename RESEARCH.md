@@ -42,21 +42,56 @@ For that, we should perform the following steps.
 As you have Spark installed and working, the following steps should be performed to complete a research.
 Every item of the following is explained in detail below.
 
-1. Build a Bag-Of-Words model for every vacancy.
-2. Transform every Bag-Of-Words to numeric feature vector.
+1. Build a Bag-Of-Words model for all vacancies.
+2. Transform text representation of every vacancy to numeric feature vector.
 3. Form vacancies dataset with required fields.
 [3a.] (This issue is optional). Perform PCA to reduce feature space of a dataset.
 4. Clusterize vacancies using obtained Bag-Of-Words feature vectors (e.g. dataset).
-5. For every vacancy:
-5.1 Retrieve a skill set.
-5.2 Compute a relevance.
-5.3 For every skill in the skill set:
-5.4. Compute a relative weight of skill.
-6. Compute Pareto optimality for the most frequent skill sets.
+5. For every vacancy: Retrieve a skill set.
+7. For every vacancy: Compute a relevance.
+8. For every skill in the each vacancy's skill set:
+9. Compute a relative weight of skill.
+10. Compute Pareto optimality for the most frequent skill sets.
 
 Below a detailed explanation of every item is given.
 
-## Build a Bag-Of-Words model for every vacancy
+## Build a Bag-Of-Words model for all vacancies
 
-Bag-Of-Words - it's a vector of strings, which contains the most frequent words
+Bag-Of-Words - it's a vector of unique words, which are contained in the text representation among all vacancies.
+In our case, the fields `name`, `description` and `key_skills` of a vacancy will be
+taken to construct text representation. Consider, that Head Hunter data is in Russian, so
+to handle Russian text there is a need to search libraries, which maintain Russian.
+**Remember, that items below describe only required functionality, but not the 
+actual code steps of the algorithm. Required logic can be implemented by several ways, and it's up to you.**
+
+1. Remove unnecessary characters from text string for single vacancy.
+2. Remove stop words. Stop words refer to the most common words in a language, which 
+care no sence for text meaning (e.g. at all, usually, is, are, at least...)
+3. Stemming - transform every word to its original grammatic form 
+(e.g. _am, is, are_ will correspond to _be_).
+4. Split text string into words.
+[4a.] (Optional) Compute n-grams to complement list of words.
+[5.](Optional) A threshold to the Bag-Of-Words length, if needed,
+ is computed as 2/3 of the word list or 3/4 of the word list.
  
+## Transform text representation of every vacancy to numeric feature vector
+
+To transform  Bag-Of-Words to feature vector, for every Bag-Of-Words we need to count
+word frequency among all Bags-Of-Words. 
+
+**Example:**
+
+`(1) John likes to watch movies. Mary likes movies too.`
+`(2) John also likes to watch football games.`
+`Bag-Of-Words: [
+    "John",
+    "likes",
+    "to",
+    "watch",
+    "movies",
+    "also",
+    "football",
+    "games",
+    "Mary",
+    "too"
+]`
