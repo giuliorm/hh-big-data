@@ -56,7 +56,7 @@ Below a detailed explanation of every item is given.
 **Remember, that items below describe only required functionality, but not the 
 actual code steps of the algorithm. Required logic can be implemented by several ways, and it's up to you.**
 
-## Build a Bag-Of-Words model for all vacancies
+### Build a Bag-Of-Words model for all vacancies
 
 Bag-Of-Words - it's a vector of unique words, which are contained in the text representation among all vacancies.
 In our case, the fields `name`, `description` of a vacancy will be
@@ -73,7 +73,7 @@ care no sence for text meaning (e.g. at all, usually, is, are, at least...)
 6. (Optional) A threshold to the Bag-Of-Words length, if needed,
  is computed as 2/3 of the word list or 3/4 of the word list.
 
-## Retrieve a skill set of every vacancy
+### Retrieve a skill set of every vacancy
 
 Normally, required vacancy skills are contained in the `key_skills` field. But often this field
 is empty, and the `description` field should be explored to retrieve a skill set. Consider, that
@@ -82,7 +82,7 @@ the most meaningful words to present the skill set, and that means, that skill s
 word frequency vector. As there is no way to retrieve "skill words" directly,
 it's a non trivial task to obtain the skills from `description`.
 
-## Transform text representation of every vacancy to numeric feature vector
+### Transform text representation of every vacancy to numeric feature vector
 
 To transform vacancies to feature vectors, we need to transform vector
 of words for every vacancy to word frequency vector among all Bag-Of-Words.
@@ -107,7 +107,7 @@ of words for every vacancy to word frequency vector among all Bag-Of-Words.
 `(1) [1, 2, 1, 1, 2, 0, 0, 0, 1, 1]`  
 `(2) [1, 1, 1, 1, 0, 1, 1, 1, 0, 0]`     
 
-## Form vacancies dataset with required fields
+### Form vacancies dataset with required fields
 
 The final vacancies dataset will be formed as list of entities, where each entity includes feature vector 
 (e.g. word frequency metric or tf-idf metric) and skill set, which is also a list of words.
@@ -115,19 +115,19 @@ The final vacancies dataset will be formed as list of entities, where each entit
 Feature vector is presented by the word frequency vector, formed from the words
 of `name` and  `description` fields.
 
-## Clusterize vacancies in the obtained dataset
+### Clusterize vacancies in the obtained dataset
 
 Any clustering algorithm can be applied to obtained vacancy dataset,
 k-means is preferrable, because it performs well on text data.
 
-## For every vacancy: Compute a relevance
+### For every vacancy: Compute a relevance
 
 For every vacancy relevance is the `<number of vacancies, which contain given skill set / number of all vacancies>`
 
-## For every skill in the each vacancy's skill set: Compute a relative weight of skill
+### For every skill in the each vacancy's skill set: Compute a relative weight of skill
 
 The relative weight of skill is the `<number of vacancies in cluster, which contain given skill / all vacancies in cluster>`
 
-## Compute Pareto optimality for the most frequent skill sets
+### Compute Pareto optimality for the most frequent skill sets
 
 ---Coming soon----
