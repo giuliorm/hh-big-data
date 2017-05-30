@@ -21,7 +21,7 @@ object scala_word_count {
           val bsonRDD = mongoRDD.map(x=>x._2.get("Plane"))	// Array[(Object, org.bson.BSONObject)] --> Array[org.bson.BSONObject]
           val jsonStringRDD = bsonRDD.map(x => x.toString)
           jsonStringRDD.foreach(rddJson=> {
-            var values__ = for { JString(x) <- parse(rddJson) \ "number"} yield x
+            var values__ = for { JString(x) <- parse(rddJson) \ "company"} yield x
             for(extract_val <- values__){println(extract_val)}
             print("-------------------------------------------------------------------------------\n")
           })
