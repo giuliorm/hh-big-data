@@ -1,19 +1,8 @@
 import org.apache.spark.SparkContext
-import org.apache.hadoop.conf.Configuration
-import org.apache.spark.SparkContext
-import org.bson.BasicBSONObject
-import org.apache.spark.SparkContext._
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.Row
-import org.elasticsearch.spark.sql._
-import sun.util.resources.cldr.id.CurrencyNames_id
-import org.apache.spark.SparkContext
 import org.json4s._
-import org.json4s.JsonDSL._
+//import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
-import scala.util.parsing.json._
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec.B
 import org.bson.BSONObject
 
 object scala_word_count {
@@ -32,7 +21,7 @@ object scala_word_count {
 
     var parsedData = jsonStringRDD.foreach(a=>{
         val JSON_ = parse(a)
-        var name = for { JString(x) <- JSON_ \\ "number" } yield x
+        var name = for { JString(x) <- JSON_ \\ "number" } yield x  // WHERE "number" is a key of the data document
         for (k<-name)
         {
             println(k)
