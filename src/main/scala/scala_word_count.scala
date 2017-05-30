@@ -1,18 +1,20 @@
 import org.apache.spark.SparkContext
 import org.apache.hadoop.conf.Configuration
-import org.bson.BSONObject
-
-import scala.util.parsing.json._
 import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext
+import org.bson.BasicBSONObject
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
-import org.apache.hadoop.conf.Configuration
 import org.apache.spark.sql.Row
-import org.bson.BSONObject
-import org.bson.BasicBSONObject
 import org.elasticsearch.spark.sql._
 import sun.util.resources.cldr.id.CurrencyNames_id
+import org.apache.spark.SparkContext
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
+import scala.util.parsing.json._
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec.B
+import org.bson.BSONObject
 
 object scala_word_count {
 
@@ -20,30 +22,22 @@ object scala_word_count {
   {
     val sc = new SparkContext("local", "Scala Word Count")
     val config = new Configuration()
-    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
     //config.set("mongo.input.uri", "mongodb://127.0.0.1:27017/local.test_mongo_spark")
     config.set("mongo.input.uri", "mongodb://127.0.0.1:27017/local.new_plane_collection")
     config.set("mongo.output.uri", "mongodb://127.0.0.1:27017/local.output__")
     val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat], classOf[Object], classOf[BSONObject])
-
     //print("COUNT FROM MONGODB --- > " + mongoRDD.count())
-
     val bsonRDD = mongoRDD.map(x=>x._2.get("Plane_17_12_16"))	// Array[(Object, org.bson.BSONObject)] --> Array[org.bson.BSONObject]
     val jsonStringRDD = bsonRDD.map(x => x.toString)	// org.apache.spark.rdd.RDD[org.bson.BSONObject] --> org.apache.spark.rdd.RDD[String]
-    //val jsonRDD = sqlContext.jsonRDD(jsonStringRDD)	// org.apache.spark.rdd.RDD[String] --> org.apache.spark.sql.DataFrame
-    //val jsonRDD_mod = jsonRDD.withColumnRenamed("_id", "mongoDB_id")
-    /*
-    val saveRDD = jsonStringRDD.map(a=> {
-        print(a)
-    })
-    */
-    jsonStringRDD.foreach(a=>
-    {
-      val jparsed = JSON.parseFull(a)
-      //val saveRDD = jparsed.map((tuple)
-      print(jparsed)
-    })
 
+    var parsedData = jsonStringRDD.foreach(a=>{
+        val JSON_ = parse(a)
+        var name = for { JString(x) <- JSON_ \\ "number" } yield x
+        for (k<-name)
+        {
+            println(k)
+        }
+    })
 
     /*
     val data__rdd = mongoRDD.foreach(a=>{
