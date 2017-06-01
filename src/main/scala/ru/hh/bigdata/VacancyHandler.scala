@@ -1,16 +1,21 @@
+package ru.hh.bigdata
+
 import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
 import org.bson.BSONObject
-import scala.collection.mutable
 
-object keyword_extractor {
+object VacancyHandler {
+
+  //val charsToRemove: Set[Char] = Set('\"', '[', ']' ,''', '(', ')', '.', ',', '-', ':', ';', '&', '?', '!')
+
+  val alphabets = List("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "a-z")
+  val charactersToOmit: String = "[^" + alphabets.flatMap(i => List(i.toLowerCase, i.toUpperCase())).mkString("") + "1-9\\s]"
 
   def clearString(s: String): String = {
-    val charsToRemove: Set[Char] = Set('\"', '[', ']' ,''', '(', ')', '.', ',', ':')
     s.trim()
      .toLowerCase()
-     .filterNot(c => charsToRemove.contains(c))
+     .replaceAll(charactersToOmit, "")
   }
 
   def retrieveName(m: BSONObject): String =
@@ -23,8 +28,23 @@ object keyword_extractor {
       .toArray()
       .map(x => x.asInstanceOf[BasicDBObject])
       .map(dbObject => dbObject.get("name").asInstanceOf[String])
+      .flatMap(str => str.split(","))
       .map(s => clearString(s))
       .toList
+  }
+
+
+
+  def retrieveSalary(m: BSONObject): Option[Salary] = {
+     val salaryObj = m.get("salary").asInstanceOf[BasicDBObject]
+     if (salaryObj != null) {
+       val salaryFrom = salaryObj.get("from").asInstanceOf[Int].toDouble
+       val salaryTo = salaryObj.get("to").asInstanceOf[Int].toDouble
+       val currency = salaryObj.get("currency").asInstanceOf[String]
+       Some(new Salary(if (salaryFrom == 0.0) None else Some(salaryFrom),
+                  if (salaryTo == 0.0) None else Some(salaryTo),
+                  currency))
+       } else None
   }
 
   def retrieveDescription(m: BSONObject): List[String] = {
@@ -40,45 +60,50 @@ object keyword_extractor {
     val startKey = "требования"
     val stopKeys = List("обязанности", "условия")
 
-    def iter(s: List[String]): List[String] = {
-      if (stopKeys.contains(s.head))
-        Nil
-      else if (s.head == startKey)
-        iter(s.tail)
-      else s.head :: iter(s.tail)
+    val reqIndex = words.indexOf(startKey)
+    if (reqIndex > -1) {
+      val nwords = words.dropWhile(word => word != startKey).tail
+      val stopInd = stopKeys
+                      .map(key => nwords.indexOf(key))
+                      .filter(ind => ind > -1)
+      if (stopInd.isEmpty)
+        nwords
+      else {
+        val stopWord = nwords(stopInd.min)
+        nwords.reverse.dropWhile(word => word != stopWord).tail
+      }
     }
-
-    iter(words)
+    else
+      words
   }
 
-  def vacancyAsText(m: BSONObject): String = {
+  def vacancyAsObject(m: BSONObject): Vacancy = {
     val name = retrieveName(m)
     val skills = retrieveSkills(m)
     val requirements = retrieveRequirements(retrieveDescription(m))
-    val r = name + " " + requirements + " " + skills
-    r
+    val salary = retrieveSalary(m)
+    new Vacancy(name, requirements, skills, salary)
   }
 
 
   def main(args: Array[String]): Unit = {
     val sc = new SparkContext("local[*]","Extract words ")
     val config = new Configuration()
-    ////////// EXAMPLE DATASET ///////////////
     val databaseName = "hh-crawler"
     val collectionName = "vacancies-test"
     config.set("mongo.input.uri", "mongodb://127.0.0.1:27017/" + databaseName + "." + collectionName)
     config.set("mongo.job.input.format", "com.mongodb.hadoop.MongoInputFormat")
+
     // Read Mongo database
     val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
       classOf[Object], classOf[BSONObject])
+
     // Convert BSON to JSON
    // Array[(Object, org.bson.BSONObject)] --> Array[org.bson.BSONObject]
     if(mongoRDD.count() != 0) {
-      val vacanciesText = mongoRDD.map(x => {
-        val vt = vacancyAsText(x._2)
-        val i = 1
-      })
-      vacanciesText.foreach(x => print(x))
+      val vacancies = mongoRDD.map(x => vacancyAsObject(x._2))
+      val bagOfWords = vacancies.map(v => v.wordsVector).fold(Nil)((v1, v2) => (v1 ::: v2).distinct)
+      //vacanciesText.foreach(x => println(x.toString()))
     }
 //      jsonStringRDD.foreach(raw_data => {
 //          implicit  val formats = DefaultFormats
