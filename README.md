@@ -2,6 +2,16 @@
 A research on the vacancies and resumes data from Head Hunter. 
 A relation of skill set and salary is estimated, for that some intermediate steps are performed.
 
+# Prerequisites
+
+To make the code run properly, you should do the following (if not):
+
+1) [download compiled winutils.exe] (https://social.msdn.microsoft.com/forums/azure/en-US/28a57efb-082b-424b-8d9e-731b1fe135de/please-read-if-experiencing-job-failures?forum=hdinsight)
+
+2) put this into the directory c:\winutils\bin;
+
+3) add this line to your code: System.setProperty("hadoop.home.dir", "c:\\winutils\\")
+
 # How to use git
 
 ## Quick instruction
