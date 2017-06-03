@@ -1,9 +1,13 @@
 package ru.hh.bigdata
-
+import scala.reflect.runtime.universe.TypeTag
 import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.bson.BSONObject
+import org.apache.spark.mllib.feature.Stemmer
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
 object VacancyHandler {
 
@@ -18,8 +22,8 @@ object VacancyHandler {
      .replaceAll(charactersToOmit, "")
   }
 
-  def retrieveName(m: BSONObject): String =
-    clearString(m.get("name").asInstanceOf[String])
+  def retrieveName(m: BSONObject): List[String] =
+    List(clearString(m.get("name").asInstanceOf[String]))
 
 
   def retrieveSkills(m: BSONObject): List[String] = {
@@ -77,17 +81,29 @@ object VacancyHandler {
       words
   }
 
-  def vacancyAsObject(m: BSONObject): Vacancy = {
+  def vacancyAsObject(m: BSONObject): Map[String, List[String]] = {
     val name = retrieveName(m)
     val skills = retrieveSkills(m)
     val requirements = retrieveRequirements(retrieveDescription(m))
     val salary = retrieveSalary(m)
-    new Vacancy(name, requirements, skills, salary)
+    Map("name" -> name, "requirements" -> requirements, "skills" -> skills)
   }
 
+  def vacanciesAsFeatureVectors(vacancies: RDD[Vacancy]) = {
+
+  }
+
+  def makeWordVector(vacancy: Map[String, List[String]]): List[String] = {
+    (vacancy("name") :::
+      vacancy("requirements").flatMap(r => r.split(" ")) :::
+      vacancy("skills").flatMap(s => s.split(" "))).filterNot(s => s == null || s == "")
+  }
 
   def main(args: Array[String]): Unit = {
+
     val sc = new SparkContext("local[*]","Extract words ")
+    val ss = new SQLContext(sc)
+  //  val session = SparkSession.builder().master("local").getOrCreate()
     val config = new Configuration()
     val databaseName = "hh-crawler"
     val collectionName = "vacancies-test"
@@ -99,10 +115,53 @@ object VacancyHandler {
       classOf[Object], classOf[BSONObject])
 
     // Convert BSON to JSON
-   // Array[(Object, org.bson.BSONObject)] --> Array[org.bson.BSONObject]
-    if(mongoRDD.count() != 0) {
+   // Array[(Object, org.bson.BSONObject)] --> Array[org.bson.BSONObject]]
+    val count = mongoRDD.count()
+    if( count != 0) {
       val vacancies = mongoRDD.map(x => vacancyAsObject(x._2))
-      val bagOfWords = vacancies.map(v => v.wordsVector).fold(Nil)((v1, v2) => (v1 ::: v2).distinct)
+
+      val vacanciesWords = vacancies.map(v => makeWordVector(v))
+      val vacanciesVectors = vacanciesWords.map(vac => {
+        val v = vac.map(word => (word, vac.indexOf(word)))
+        v
+      })
+
+     // vacanciesVectors.foreach(v => {
+     //   val df = ss.createDataFrame(v).toDF("word", "id")
+     // })
+
+     // val h = vacanciesVectors.first()
+     //
+
+      /*val data = vacancies.map(vac => {
+        val v = vac.wordsVector
+          .map().toSeq
+        ss.createDataFrame(v).toDF("word", "id")
+      }).take(5) */
+
+    /*  val schema = StructType(
+        StructField("str", StringType) ::
+          StructField("dbl", DoubleType) :: Nil
+      )
+
+      data.foreach(v => {
+        val stemmed = new Stemmer()
+          .setLanguage("Russian")
+          .setInputCol("word")
+          .setOutputCol("stemmed")
+          .transform(v)
+        stemmed.show
+      }) */
+    //  val bagOfWords = vacanciesStemmed
+    //    .fold(Nil)((v1, v2) => (v1 ::: v2)
+     //     .distinct)
+
+    //  val counts = vacancies.map(vac => vac
+   //     .wordsVector
+  //      .groupBy(word => word)
+   //     .mapValues(_.size))
+
+      val i = 1
       //vacanciesText.foreach(x => println(x.toString()))
     }
 //      jsonStringRDD.foreach(raw_data => {
