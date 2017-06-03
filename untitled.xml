@@ -1604,7 +1604,7 @@
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>
-      <fileset dir="${module.untitled.basedir}/src/main/resources">
+      <fileset dir="/src/resources">
         <patternset refid="compiler.resources"/>
         <type type="file"/>
       </fileset>

@@ -1,4 +1,4 @@
-package ru.hh.bigdata
+package ru.hh.bigdata.domain
 
 /**
   * Created by JuriaSan on 01.06.2017.
