@@ -4,8 +4,8 @@ import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.lucene.analysis.CharArraySet
 import org.apache.lucene.analysis.ru.RussianAnalyzer
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.SQLContext
 import org.bson.BSONObject
-import ru.hh.bigdata.StringUtil
 import ru.hh.bigdata.domain.Salary
 import ru.hh.bigdata.util.stemmer.RussianStemmer
 
@@ -101,15 +101,17 @@ object VacancyHandler {
   }
 
   def bagOfWords(vacancies: RDD[List[String]]): List[String] = {
-    vacancies.fold(Nil)((v1, v2) => v1 ::: v2).distinct
+    vacancies.reduce((v1, v2) => (v1 ::: v2).distinct)
   }
 
   def vectorizeVacanciesRDD(vacancies: RDD[List[String]], bagOfWords: List[String]):
   RDD[List[Tuple2[String, Int]]] = {
+
+    //vacancies.zip(bagOfWords)
     val vacFeatures = vacancies.map(vac => {
       bagOfWords
         .map(wordFromBag => (wordFromBag, vac.count(word => word == wordFromBag)))
-    })
+   })
     vacFeatures
   }
 

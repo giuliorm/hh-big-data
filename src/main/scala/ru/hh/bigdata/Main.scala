@@ -2,7 +2,6 @@ package ru.hh.bigdata
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
 import org.bson.{BSONObject, BasicBSONObject}
-import ru.hh.VacancyHandler
 
 object Main {
 
@@ -22,10 +21,12 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
+   System.setProperty("hadoop.home.dir", "c:\\winutils\\")
+
    val sc = new SparkContext("local[*]","Extract words ")
 
    val databaseName = "hh-crawler"
-   val inputCol = "vacancies"
+   val inputCol = "vacancies-test"
    val outputCol = "vacancies-output"
    val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
 
@@ -33,13 +34,16 @@ object Main {
       classOf[Object], classOf[BSONObject])
 
    val count = mongoRDD.count()
-    println(count)
-    return
+
    if( count != 0) {
      val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
 
+     //vacanciesRaw.take(1000).foreach(v => println(v("requirements")))
+
      val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
+
      val bagOfWords = VacancyHandler.bagOfWords(vacancies)
+
      val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
      val vacFinalRDD = SerializationUtil.serialize(vacFeatures)
