@@ -2,6 +2,7 @@ package ru.hh
 
 import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.lucene.analysis.ru.RussianAnalyzer
+import org.apache.spark.rdd.RDD
 import org.bson.BSONObject
 import ru.hh.bigdata.StringUtil
 import ru.hh.bigdata.domain.Salary
@@ -93,6 +94,28 @@ object VacancyHandler {
       vacancy("requirements").flatMap(r => r.split(" ")) :::
       vacancy("skills").flatMap(s => s.split(" ")))
       .filterNot(s => s == null || s == "")
+  }
+
+  def bagOfWords(vacancies: RDD[List[String]]): List[String] = {
+    vacancies.fold(Nil)((v1, v2) => v1 ::: v2).distinct
+  }
+
+  def vectorizeVacanciesRDD(vacancies: RDD[List[String]], bagOfWords: List[String]):
+  RDD[List[Pair[String, Int]]] = {
+    val vacFeatures = vacancies.map(vac => {
+      bagOfWords
+        .map(wordFromBag => (wordFromBag, vac.count(word => word == wordFromBag)))
+    })
+    vacFeatures
+  }
+
+
+  def stemAndClearRDD(vacanciesRaw: RDD[Map[String, List[String]]]):
+  RDD[List[String]] = {
+    val vacanciesWordVectors = vacanciesRaw.map(v => VacancyHandler.makeWordVector(v))
+    val vacancies = vacanciesWordVectors.map(vec =>
+      VacancyHandler.stemAndClearVector(vec))
+    vacancies
   }
 
 }

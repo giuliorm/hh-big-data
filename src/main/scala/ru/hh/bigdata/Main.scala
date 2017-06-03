@@ -1,13 +1,8 @@
 package ru.hh.bigdata
-import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
 import org.bson.{BSONObject, BasicBSONObject}
-import org.apache.lucene.analysis.ru.RussianAnalyzer
 import ru.hh.VacancyHandler
-import ru.hh.bigdata.util.stemmer.RussianStemmer
-
 
 object Main {
 
@@ -15,6 +10,7 @@ object Main {
                databaseName: String,
                inputCol: String,
                outputCol: String): Configuration = {
+
     val config = new Configuration()
     config.set("mongo.input.uri",
       uri + databaseName + "." + inputCol)
@@ -29,7 +25,7 @@ object Main {
    val sc = new SparkContext("local[*]","Extract words ")
 
    val databaseName = "hh-crawler"
-   val inputCol = "vacancies-test"
+   val inputCol = "vacancies"
    val outputCol = "vacancies-output"
    val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
 
@@ -37,33 +33,22 @@ object Main {
       classOf[Object], classOf[BSONObject])
 
    val count = mongoRDD.count()
+    println(count)
+    return
    if( count != 0) {
-      val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
+     val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
 
-      val vacanciesWordVectors = vacanciesRaw.map(v => VacancyHandler.makeWordVector(v))
-      val vacancies = vacanciesWordVectors.map(vec =>
-        VacancyHandler.stemAndClearVector(vec))
+     val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
+     val bagOfWords = VacancyHandler.bagOfWords(vacancies)
+     val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
-      val bagOfWords = vacancies
-       .fold(Nil)((v1, v2) => v1 ::: v2).distinct
+     val vacFinalRDD = SerializationUtil.serialize(vacFeatures)
 
-      val vacFeatures = vacancies.map(vac => {
-          bagOfWords
-            .map(wordFromBag => (wordFromBag, vac.count(word => word == wordFromBag)))
-        })
-
-        val vacFinalRDD = vacFeatures.map(wc => {
-          var bson = new BasicBSONObject()
-          var words = SerializationUtil.serialize(wc)
-          bson.put("words", words)
-          (null, bson)
-        })
-
-        vacFinalRDD.saveAsNewAPIHadoopFile(
-          "file:///this-string-is-unused.txt",
-          classOf[Any],
-          classOf[Any],
-          classOf[com.mongodb.hadoop.MongoOutputFormat[Any, Any]], config)
+     vacFinalRDD.saveAsNewAPIHadoopFile(
+      "file:///this-string-is-unused.txt",
+      classOf[Any],
+      classOf[Any],
+      classOf[com.mongodb.hadoop.MongoOutputFormat[Any, Any]], config)
     }
   }
 }
