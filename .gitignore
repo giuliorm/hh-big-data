@@ -1,4 +1,0 @@
-.idea/
-.git/
-!/.gitignore
-main/database/__pycache__/
