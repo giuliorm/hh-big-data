@@ -1,6 +1,8 @@
 # hh-big-data
 A research on the vacancies and resumes data from Head Hunter. 
-A relation of skill set and salary is estimated, for that some intermediate steps are performed.
+A relation of skill set and salary is estimated,
+for that some intermediate steps are performed.
+Used technologies & libs: Scala, Spark, Hadoop, MongoDB, Apache Lucene.
 
 # Prerequisites
 
