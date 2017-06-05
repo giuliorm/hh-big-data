@@ -22,6 +22,7 @@ object Main {
   }
   val databaseName = "hh-crawler"
 
+  // reads the bag of words from database
   def getBagOfWords(sc: SparkContext): List[String] = {
 
     val inputCol = "bagofwords-test"
@@ -35,6 +36,8 @@ object Main {
     mongoRDD.map(i => i._2.get("word").asInstanceOf[String]).collect().toList
   }
 
+  // collects bags of words, saves it to database and returns a bag of words in-memory
+  // collection
   def collectBagOfWords(sc: SparkContext, vacancies: RDD[List[String]]): List[String] = {
 
       val bagOfWordsRDD = VacancyHandler.bagOfWords(vacancies)
