@@ -4,6 +4,11 @@ A relation of skill set and salary is estimated,
 for that some intermediate steps are performed.
 Used technologies & libs: Scala, Spark, Hadoop, MongoDB, Apache Lucene.
 
+# Issues
+
+- If you encounter exceptions from BSON mongo serializer, consider to execute
+`db.collection.reIndex()` in the mongodb shell, it should
+
 # Prerequisites
 
 To make the code run properly, you should do the following (if not):
