@@ -28,24 +28,28 @@ object Main {
     val outputCol = "vacancies-output"
 
     val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
+
     val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
       classOf[Object], classOf[BSONObject])
+
     mongoRDD.map(i => i._2.get("word").asInstanceOf[String]).collect().toList
   }
 
-  def collectBagOfWords(sc: SparkContext, vacancies: RDD[List[String]]) = {
+  def collectBagOfWords(sc: SparkContext, vacancies: RDD[List[String]]): List[String] = {
 
       val bagOfWordsRDD = VacancyHandler.bagOfWords(vacancies)
 
       val bagConfig = new Configuration()
       bagConfig.set("mongo.output.uri",
-        "mongodb://127.0.0.1:27017/" + databaseName + ".bagofwords")
+        "mongodb://127.0.0.1:27017/" + databaseName + ".bagofwords-test")
 
       SerializationUtil.serializeStringVec(bagOfWordsRDD).saveAsNewAPIHadoopFile(
         "file:///this-string-is-unused.txt",
         classOf[Any],
         classOf[Any],
         classOf[com.mongodb.hadoop.MongoOutputFormat[Any, Any]], bagConfig)
+
+      bagOfWordsRDD.collect().toList
   }
 
   def main(args: Array[String]): Unit = {
@@ -53,7 +57,7 @@ object Main {
    System.setProperty("hadoop.home.dir", "c:\\winutils\\")
 
    val sc = new SparkContext("local[*]","Extract words ")
-    val inputCol = "vacancies"
+    val inputCol = "vacancies-test"
     val outputCol = "vacancies-output"
     val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
     val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
@@ -61,7 +65,7 @@ object Main {
     val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
    // val count = mongoRDD.count()
      val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
-     val bagOfWords = getBagOfWords(sc)
+     val bagOfWords = collectBagOfWords(sc, vacancies)
 
      val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
