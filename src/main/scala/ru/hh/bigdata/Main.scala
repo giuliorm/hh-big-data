@@ -24,7 +24,7 @@ object Main {
 
   def getBagOfWords(sc: SparkContext): List[String] = {
 
-    val inputCol = "bagofwords"
+    val inputCol = "bagofwords-test"
     val outputCol = "vacancies-output"
 
     val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
@@ -41,7 +41,7 @@ object Main {
 
       val bagConfig = new Configuration()
       bagConfig.set("mongo.output.uri",
-        "mongodb://127.0.0.1:27017/" + databaseName + ".bagofwords-test")
+        "mongodb://127.0.0.1:27017/" + databaseName + ".bagofwords")
 
       SerializationUtil.serializeStringVec(bagOfWordsRDD).saveAsNewAPIHadoopFile(
         "file:///this-string-is-unused.txt",
@@ -65,9 +65,11 @@ object Main {
     val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
    // val count = mongoRDD.count()
      val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
-     val bagOfWords = collectBagOfWords(sc, vacancies)
+     //val bagOfWords = collectBagOfWords(sc, vacancies)
+     val bagOfWords = getBagOfWords(sc)
 
-     val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
+
+    val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
      //val vacFinalRDD = SerializationUtil.serializeIntVec(vacFeatures)
 
