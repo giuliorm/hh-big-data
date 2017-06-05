@@ -76,6 +76,6 @@ object Main {
     //  classOf[Any],
     //  classOf[Any],
     //  classOf[com.mongodb.hadoop.MongoOutputFormat[Any, Any]], config)
-    }
+
   }
 }
