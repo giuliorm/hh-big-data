@@ -2,6 +2,7 @@ package ru.hh.bigdata
 import com.mongodb.BasicDBList
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 import org.bson.{BSONObject, BasicBSONObject}
 
 object Main {
@@ -32,22 +33,7 @@ object Main {
     mongoRDD.map(i => i._2.get("word").asInstanceOf[String]).collect().toList
   }
 
-  def collectBagOfWords(sc: SparkContext) = {
-    val inputCol = "vacancies"
-    val outputCol = "vacancies-output"
-    val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
-
-    val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
-      classOf[Object], classOf[BSONObject])
-
-    val count = mongoRDD.count()
-
-    if( count != 0) {
-      val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
-
-      //vacanciesRaw.take(1000).foreach(v => println(v("requirements")))
-
-      val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
+  def collectBagOfWords(sc: SparkContext, vacancies: RDD[List[String]]) = {
 
       val bagOfWordsRDD = VacancyHandler.bagOfWords(vacancies)
 
@@ -67,10 +53,15 @@ object Main {
    System.setProperty("hadoop.home.dir", "c:\\winutils\\")
 
    val sc = new SparkContext("local[*]","Extract words ")
-
-
-
-     val bagOfWords = bagOfWordsRDD.collect().toList
+    val inputCol = "vacancies"
+    val outputCol = "vacancies-output"
+    val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
+    val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
+      classOf[Object], classOf[BSONObject])
+    val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
+   // val count = mongoRDD.count()
+     val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
+     val bagOfWords = getBagOfWords(sc)
 
      val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
