@@ -71,8 +71,7 @@ object Main {
      //val bagOfWords = collectBagOfWords(sc, vacancies)
      val bagOfWords = getBagOfWords(sc)
 
-
-    val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
+     val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
 
      //val vacFinalRDD = SerializationUtil.serializeIntVec(vacFeatures)
 
