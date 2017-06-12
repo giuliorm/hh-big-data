@@ -46,8 +46,8 @@ object VacancyHandler {
       .asInstanceOf[String]
       .split("""<(?!\/?a(?=>|\s.*>))\/?.*?>""")
       .flatMap(req => req.split(","))
-      .filter(x => StringUtil.clearString(x) != "")
       .map(x => StringUtil.clearString(x))
+      .filter(x => x != "" && StringUtil.containsOnlyLetters(x))
       .toList
   }
 
@@ -85,10 +85,9 @@ object VacancyHandler {
   def stemAndClearVector(vec: List[String]): List[String] = {
     //val russianStopWords = new RussianAnalyzer().getStopwordSet
 
-    vec.map(word => StringUtil.clearString(word))
-      .filter(word => word != "" && !stopwordSet.contains(word))
+    vec
+      .filter(word => word.length > 3 && !stopwordSet.contains(word))
       .map(word => RussianStemmer.stem(word))
-      .filter(word => StringUtil.containsOnlyLetters(word) && word.length > 2)
   }
 
 
@@ -100,17 +99,17 @@ object VacancyHandler {
       .filterNot(s => s == null || s == "")
   }
 
-  def bagOfWords(vacancies: RDD[List[String]]): List[String] = {
-    vacancies.reduce((v1, v2) => (v1 ::: v2).distinct)
+  def bagOfWords(vacancies: RDD[List[String]]): RDD[String] = {
+    vacancies.flatMap(w => w).distinct
   }
 
   def vectorizeVacanciesRDD(vacancies: RDD[List[String]], bagOfWords: List[String]):
-  RDD[List[Tuple2[String, Int]]] = {
+  RDD[List[Int]] = {
 
     //vacancies.zip(bagOfWords)
     val vacFeatures = vacancies.map(vac => {
       bagOfWords
-        .map(wordFromBag => (wordFromBag, vac.count(word => word == wordFromBag)))
+        .map(wordFromBag => vac.count(word => word == wordFromBag))
    })
     vacFeatures
   }

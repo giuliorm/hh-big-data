@@ -16,6 +16,7 @@ object SerializationUtil {
     o
   }
 
+
   def serialize(list: List[Tuple2[String, Int]]): BasicDBList = {
      var l = new BasicDBList()
      list.foreach(w => {
@@ -23,6 +24,24 @@ object SerializationUtil {
       l.add(o)
     })
     l
+  }
+
+  def serializeStringVec(strVec: RDD[String]): RDD[(Null, BasicBSONObject)] = {
+    strVec.map(s => {
+      var o = new BasicBSONObject()
+      o.put("word", s)
+      (null, o)
+    })
+  }
+
+  def serializeIntVec(vacancies: RDD[List[Int]]): RDD[(Null, BasicBSONObject)] = {
+    vacancies.map(vacList => {
+      var o = new BasicBSONObject()
+      var   list = new BasicDBList()
+      vacList.foreach(v => list.add(new Integer(v)))
+      o.put("vacancy", list)
+      (null, o)
+    })
   }
 
   def serialize(vacancies: RDD[List[Tuple2[String, Int]]]):
