@@ -2,6 +2,7 @@ package ru.hh.bigdata
 import com.mongodb.BasicDBList
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkContext
+import org.apache.spark.mllib.linalg.distributed.RowMatrix
 import org.apache.spark.rdd.RDD
 import org.bson.{BSONObject, BasicBSONObject}
 
@@ -25,7 +26,7 @@ object Main {
   // reads the bag of words from database
   def getBagOfWords(sc: SparkContext): List[String] = {
 
-    val inputCol = "bagofwords-test"
+    val inputCol = "bag-of-words"
     val outputCol = "vacancies-output"
 
     val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
@@ -44,13 +45,14 @@ object Main {
 
       val bagConfig = new Configuration()
       bagConfig.set("mongo.output.uri",
-        "mongodb://127.0.0.1:27017/" + databaseName + ".bagofwords")
+        "mongodb://127.0.0.1:27017/" + databaseName + ".bag-of-words")
 
       SerializationUtil.serializeStringVec(bagOfWordsRDD).saveAsNewAPIHadoopFile(
         "file:///this-string-is-unused.txt",
         classOf[Any],
         classOf[Any],
         classOf[com.mongodb.hadoop.MongoOutputFormat[Any, Any]], bagConfig)
+
 
       bagOfWordsRDD.collect().toList
   }
@@ -60,7 +62,7 @@ object Main {
    System.setProperty("hadoop.home.dir", "c:\\winutils\\")
 
    val sc = new SparkContext("local[*]","Extract words ")
-    val inputCol = "vacancies-test"
+    val inputCol = "vacancies"
     val outputCol = "vacancies-output"
     val config = dbConfig("mongodb://127.0.0.1:27017/", databaseName, inputCol, outputCol)
     val mongoRDD = sc.newAPIHadoopRDD(config, classOf[com.mongodb.hadoop.MongoInputFormat],
@@ -68,11 +70,11 @@ object Main {
     val vacanciesRaw = mongoRDD.map(x => VacancyHandler.vacancyAsMap(x._2))
    // val count = mongoRDD.count()
      val vacancies = VacancyHandler.stemAndClearRDD(vacanciesRaw)
-     //val bagOfWords = collectBagOfWords(sc, vacancies)
-     val bagOfWords = getBagOfWords(sc)
+     val bagOfWords = collectBagOfWords(sc, vacancies)
+     //val bagOfWords = getBagOfWords(sc)
 
-     val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
-
+    // val vacFeatures = VacancyHandler.vectorizeVacanciesRDD(vacancies, bagOfWords)
+    // val m = new RowMatrix(vacFeatures)
      //val vacFinalRDD = SerializationUtil.serializeIntVec(vacFeatures)
 
    //  val partitionNum = 3000

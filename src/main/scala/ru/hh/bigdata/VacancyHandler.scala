@@ -3,6 +3,8 @@ package ru.hh.bigdata
 import com.mongodb.{BasicDBList, BasicDBObject}
 import org.apache.lucene.analysis.CharArraySet
 import org.apache.lucene.analysis.ru.RussianAnalyzer
+import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.bson.BSONObject
@@ -92,11 +94,13 @@ object VacancyHandler {
 
 
 
+
   def makeWordVector(vacancy: Map[String, List[String]]): List[String] = {
-    (vacancy("name") :::
-      vacancy("requirements").flatMap(r => r.split(" ")) :::
-      vacancy("skills").flatMap(s => s.split(" ")))
-      .filterNot(s => s == null || s == "")
+     val list = vacancy("name") :::
+      StringUtil.splitString(vacancy("requirements")) :::
+      StringUtil.splitString(vacancy("skills"))
+
+      StringUtil.splitString(list).filterNot(s => s == null || s == "")
   }
 
   def bagOfWords(vacancies: RDD[List[String]]): RDD[String] = {
@@ -104,12 +108,14 @@ object VacancyHandler {
   }
 
   def vectorizeVacanciesRDD(vacancies: RDD[List[String]], bagOfWords: List[String]):
-  RDD[List[Int]] = {
+  RDD[Vector] = {
 
     //vacancies.zip(bagOfWords)
     val vacFeatures = vacancies.map(vac => {
-      bagOfWords
-        .map(wordFromBag => vac.count(word => word == wordFromBag))
+      val sv = bagOfWords
+        .map(wordFromBag => vac.count(word => word == wordFromBag).toDouble)
+        .to[scala.Vector].toArray
+      Vectors.dense(sv)
    })
     vacFeatures
   }

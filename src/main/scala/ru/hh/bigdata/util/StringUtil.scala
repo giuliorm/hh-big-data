@@ -22,6 +22,11 @@ object StringUtil {
     alphabets.flatMap(i => List(i.toLowerCase, i.toUpperCase()))
       .mkString("") + "]+"
 
+  def splitString(str: List[String]): List[String] = {
+    str.flatMap(r =>
+      r.split("\\s").flatMap(r => r.split(",")))
+  }
+
   def clearString(s: String): String = {
     s.trim()
       .toLowerCase()
