@@ -8,7 +8,8 @@ import org.apache.spark.sql.SQLContext
 import org.bson.BSONObject
 import ru.hh.bigdata.domain.Salary
 import ru.hh.bigdata.util.stemmer.RussianStemmer
-
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.Vectors
 /**
   * Created by JuriaSan on 03.06.2017.
   */
@@ -104,12 +105,15 @@ object VacancyHandler {
   }
 
   def vectorizeVacanciesRDD(vacancies: RDD[List[String]], bagOfWords: List[String]):
-  RDD[List[Int]] = {
+  RDD[Vector] = {
 
     //vacancies.zip(bagOfWords)
     val vacFeatures = vacancies.map(vac => {
-      bagOfWords
-        .map(wordFromBag => vac.count(word => word == wordFromBag))
+      val cv =  bagOfWords
+        .map(wordFromBag => vac.count(word => word == wordFromBag).toDouble)
+        .to[scala.Vector]
+        .toArray
+      Vectors.dense(cv)
    })
     vacFeatures
   }
