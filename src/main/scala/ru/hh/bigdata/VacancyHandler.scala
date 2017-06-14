@@ -93,7 +93,13 @@ object VacancyHandler {
   }
 
 
-
+  def clearVacancies(vacancies: RDD[Map[String, List[String]]]):
+      RDD[Map[String, List[String]]] = {
+      vacancies.map(v => Map("name" -> v("name"),
+        "requirements" -> StringUtil.splitString(v("requirements")),
+        "skills" -> StringUtil.splitString(v("skills"))
+      ))
+  }
 
   def makeWordVector(vacancy: Map[String, List[String]]): List[String] = {
      val list = vacancy("name") :::
@@ -119,7 +125,6 @@ object VacancyHandler {
    })
     vacFeatures
   }
-
 
   def stemAndClearRDD(vacanciesRaw: RDD[Map[String, List[String]]]):
   RDD[List[String]] = {
